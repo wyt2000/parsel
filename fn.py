@@ -51,8 +51,13 @@ class Function:
             base_str += CONSTS["ret_helper"].format(ret=', '.join(self.ret))
         other_children = [child for child in self.children if child.name != self.name]
         if other_children:
+            uses = []
+            for child in other_children:
+                ret_str = (" -> " + ", ".join(child.ret)) if child.ret else ""
+                uses.append(f"  - {child.name}({', '.join(child.args)}){ret_str}: {child.desc}")
             base_str += CONSTS["use_helper"].format(
-                uses=', '.join([child.name for child in other_children]))
+                    uses='\n'.join(uses)
+                )
         base_str += f"{self.header()}:\n"
         if self.asserts:
             for cur_assert in self.asserts:
@@ -96,7 +101,7 @@ assert"""
         if 'max_tokens' in CONSTS:
             max_tokens = CONSTS['max_tokens']
         else:
-            max_tokens = 500
+            max_tokens = 3000
         if num_completions is None:
             num_completions = CONSTS['num_completions']
         self.implementations = codex.generate(

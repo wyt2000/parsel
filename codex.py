@@ -12,6 +12,7 @@ class CodeGen():
     def __init__(self, cache="cache.json"):
         self.cache_file = cache
         self.exponential_backoff = 1
+        self.messages = []
         # Load the cache JSON file, if cache file exists. Else, cache is {}
         if os.path.exists(cache):
             while os.path.exists(self.cache_file + ".tmp") or os.path.exists(self.cache_file + ".lock"):
@@ -22,7 +23,7 @@ class CodeGen():
             self.cache = {}
 
     def generate(self,
-        codex_in, num_completions=8, max_tokens=500, temperature=0.5, presence_penalty=0.0,
+        codex_in, num_completions=8, max_tokens=3000, temperature=0.5, presence_penalty=0.0,
         stop=["\ndef"], indented=True, indented_after_first_line=False, require=None, cache_key=None,
         rate_limit_tokens=4000, verbose=False, logit_bias=None, model_name=None
     ):
@@ -58,29 +59,26 @@ class CodeGen():
         completions_per_call = rate_limit_tokens // max_tokens
         while total_tokens > 0:
             #num_completions = min(total_tokens // max_tokens, completions_per_call)
-            print(num_completions, "completions", max_tokens, "tokens each")
+            print(num_completions, "completions")
             while True:
                 try:
                     time.sleep(8)
-                    print(codex_in)
                     if logit_bias is None:
+                        print(codex_in)
+                        messages = [{"role" : "system", "content" : "You are an expert of the Python programming language."}, {"role": "user", "content": "Please return a python function meets the following requirements. You should return return only the pure code. Omit explanations or any additional text. Ensure that your code can be directly compiled without errors.\n" + codex_in}, {"role": "user", "content": codex_in}]
                         completions = openai.ChatCompletion.create(
                             model=model_name,
-                            messages=[{"role": "system", "content": "Please complete the code and return only the pure code. Omit explanations or any additional text. Ensure that your code can be directly compiled without errors."}, {"role": "user", "content": codex_in}],
-                            max_tokens=max_tokens,
+                            messages=messages,
                             temperature=temperature,
                             presence_penalty=presence_penalty,
-                            stop=stop,
                             n=num_completions,
                         )['choices']
                     else:
                         completions = openai.ChatCompletion.create(
                             model=model_name,
-                            messages=[{"role": "user", "content": codex_in}],
-                            max_tokens=max_tokens,
+                            messages=messages,
                             temperature=temperature,
                             presence_penalty=presence_penalty,
-                            stop=stop,
                             n=num_completions,
                             logit_bias=logit_bias
                         )['choices']
@@ -92,7 +90,11 @@ class CodeGen():
                     self.exponential_backoff *= 2
             for completion in completions:
                 result = []
-                for line_idx, line in enumerate(completion["message"]["content"].split("\n")): 
+                response = completion["message"]["content"]
+                if response[:9] == "```python" or response[:9] == "```Python":
+                    response = response[9:]
+                response = response.strip("```")
+                for line_idx, line in enumerate(response.split("\n")): 
                     result += [line]
                 results.append(result)
 
