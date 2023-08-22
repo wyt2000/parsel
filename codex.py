@@ -1,3 +1,6 @@
+'''
+Codex was deprecated by openai, so change the model to gpt3.5.
+'''
 import json
 import openai
 import os
@@ -48,9 +51,8 @@ class CodeGen():
         else:
             results = []
 
-        print(f"Using {model_name} model")
+        print(f"Using {model_name} model!")
 
-        print("Calling Codex!")
         # raise Exception("Codex is not available")
         total_tokens = num_completions * max_tokens
         completions_per_call = rate_limit_tokens // max_tokens
@@ -60,6 +62,7 @@ class CodeGen():
             while True:
                 try:
                     time.sleep(8)
+                    print(codex_in)
                     if logit_bias is None:
                         completions = openai.ChatCompletion.create(
                             model=model_name,

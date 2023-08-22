@@ -85,7 +85,6 @@ assert"""
         def join_str(strs):
             return "\n".join(strs)
         return [CONSTS["impl_helper"].format(
-            header="",
             impls=join_str(impl),
             asserts=join_str([
                 CONSTS["assert_helper"](cur_assert) for cur_assert in self.asserts]),
@@ -114,7 +113,7 @@ assert"""
         self.implementations = list(filter(CONSTS["impl_filter"], self.implementations))
         if "shuffle_implementations" in CONSTS and CONSTS["shuffle_implementations"]:
             random.shuffle(self.implementations)
-        self.implementations = self.implementations[:CONSTS['num_completions_eval']]
+        self.implementations = self.implementations[:CONSTS['num_completions']]
 
     # Generate tests for this function
     def generate_tests(self, codex, num_completions=None):
