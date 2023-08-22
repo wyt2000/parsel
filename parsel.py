@@ -641,7 +641,7 @@ if __name__ == "__main__":
     args = argparser.parse_args()
 
     assert args.source_file.split(".")[-1] == 'ss'
-    codegen = CodeGen(args.cache, args.key)
+    codegen = CodeGen()
     if args.best:
         debug = 'best'
     else:

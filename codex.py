@@ -6,7 +6,7 @@ from consts import CONSTS
 import random
 
 class CodeGen():
-    def __init__(self, cache="cache.json", key="keys/codex_key.txt"):
+    def __init__(self, cache="cache.json"):
         self.cache_file = cache
         self.exponential_backoff = 1
         # Load the cache JSON file, if cache file exists. Else, cache is {}
@@ -18,18 +18,13 @@ class CodeGen():
         else:
             self.cache = {}
 
-        # Load codex key from file
-        with open(key, "r") as f:
-            codex_key = f.read().strip()
-        openai.organization, openai.api_key = codex_key.split(":")
-
     def generate(self,
         codex_in, num_completions=8, max_tokens=500, temperature=0.5, presence_penalty=0.0,
         stop=["\ndef"], indented=True, indented_after_first_line=False, require=None, cache_key=None,
         rate_limit_tokens=4000, verbose=False, logit_bias=None, model_name=None
     ):
         if model_name is None:
-            model_name = "code-davinci-002"
+            model_name = "gpt-3.5-turbo-0301"
         if verbose:
             print(codex_in)
             print("-----")
@@ -53,23 +48,22 @@ class CodeGen():
         else:
             results = []
 
-        if model_name != "code-davinci-002":
-            print("WARNING, using davinci text model")
+        print(f"Using {model_name} model")
 
         print("Calling Codex!")
         # raise Exception("Codex is not available")
         total_tokens = num_completions * max_tokens
         completions_per_call = rate_limit_tokens // max_tokens
         while total_tokens > 0:
-            num_completions = min(total_tokens // max_tokens, completions_per_call)
+            #num_completions = min(total_tokens // max_tokens, completions_per_call)
             print(num_completions, "completions", max_tokens, "tokens each")
             while True:
                 try:
                     time.sleep(8)
                     if logit_bias is None:
-                        completions = openai.Completion.create(
+                        completions = openai.ChatCompletion.create(
                             model=model_name,
-                            prompt=codex_in,
+                            messages=[{"role": "system", "content": "Please complete the code and return only the pure code. Omit explanations or any additional text. Ensure that your code can be directly compiled without errors."}, {"role": "user", "content": codex_in}],
                             max_tokens=max_tokens,
                             temperature=temperature,
                             presence_penalty=presence_penalty,
@@ -77,9 +71,9 @@ class CodeGen():
                             n=num_completions,
                         )['choices']
                     else:
-                        completions = openai.Completion.create(
+                        completions = openai.ChatCompletion.create(
                             model=model_name,
-                            prompt=codex_in,
+                            messages=[{"role": "user", "content": codex_in}],
                             max_tokens=max_tokens,
                             temperature=temperature,
                             presence_penalty=presence_penalty,
@@ -95,11 +89,7 @@ class CodeGen():
                     self.exponential_backoff *= 2
             for completion in completions:
                 result = []
-                for line_idx, line in enumerate(completion.text.split("\n")):
-                    if (indented or (indented_after_first_line and line_idx > 0)) and line.lstrip() == line and line.strip() != "":
-                        break
-                    if require is not None and line.strip() != "" and require not in line:
-                        break
+                for line_idx, line in enumerate(completion["message"]["content"].split("\n")): 
                     result += [line]
                 results.append(result)
 

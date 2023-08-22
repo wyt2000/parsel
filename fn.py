@@ -85,7 +85,7 @@ assert"""
         def join_str(strs):
             return "\n".join(strs)
         return [CONSTS["impl_helper"].format(
-            header=self.header(),
+            header="",
             impls=join_str(impl),
             asserts=join_str([
                 CONSTS["assert_helper"](cur_assert) for cur_assert in self.asserts]),
