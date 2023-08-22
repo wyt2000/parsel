@@ -29,26 +29,6 @@ class Function:
         base_str = ""
         base_str += self.prefix
         already_listed = [self.name]
-        for child in self.children:
-            if child.name in already_listed:
-                continue
-            already_listed.append(child.name)
-            ret_str = (" -> " + ", ".join(child.ret)) if child.ret else ""
-            if isinstance(CONSTS["desc_helper"], str):
-                base_str += CONSTS["desc_helper"].format(desc=child.desc)
-            else:
-                base_str += CONSTS["desc_helper"](child.desc)
-            base_str += CONSTS["sig_helper"].format(
-                sig=f"{child.name}({', '.join(child.args)}){ret_str}")
-            base_str += CONSTS["import"].format(name=child.name)
-            base_str += f"\n"
-        if self.desc:
-            if isinstance(CONSTS["desc_helper"], str):
-                base_str += CONSTS["desc_helper"].format(desc=self.desc)
-            else:
-                base_str += CONSTS["desc_helper"](self.desc)
-        if self.ret and ', '.join(self.ret):
-            base_str += CONSTS["ret_helper"].format(ret=', '.join(self.ret))
         other_children = [child for child in self.children if child.name != self.name]
         if other_children:
             uses = []
@@ -57,7 +37,14 @@ class Function:
                 uses.append(f"  - {child.name}({', '.join(child.args)}){ret_str}: {child.desc}")
             base_str += CONSTS["use_helper"].format(
                     uses='\n'.join(uses)
-                )
+            )
+        if self.desc:
+            if isinstance(CONSTS["desc_helper"], str):
+                base_str += CONSTS["desc_helper"].format(desc=self.desc)
+            else:
+                base_str += CONSTS["desc_helper"](self.desc)
+        if self.ret and ', '.join(self.ret):
+            base_str += CONSTS["ret_helper"].format(ret=', '.join(self.ret))
         base_str += f"{self.header()}:\n"
         if self.asserts:
             for cur_assert in self.asserts:

@@ -94,6 +94,7 @@ class CodeGen():
                 if response[:9] == "```python" or response[:9] == "```Python":
                     response = response[9:]
                 response = response.strip("```")
+                print(response)
                 for line_idx, line in enumerate(response.split("\n")): 
                     result += [line]
                 results.append(result)
