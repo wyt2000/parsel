@@ -505,7 +505,7 @@ def implement_scc(scc_idx, sccs, implemented_sccs, scc_edges, defined_fns, codeg
                 fn = defined_fns[fn_name]
                 fn.implement(codegen, num_completions=num_completions)
                 if generate_tests:
-                    fn.generate_tests(codegen, num_completions=num_completions * 2)
+                    fn.generate_tests(codegen, num_completions=num_completions)
 
             # We support a "sample only" mode, where we don't actually
             # implement the SCC, but just try to run inference.

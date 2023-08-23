@@ -54,10 +54,7 @@ class Function:
     # Constructs prompt for code generation
     def get_codex_test_input(self):
         base_str = self.get_codex_input()
-        base_str += f"""  pass
-
-# check the correctness of {self.name}
-assert"""
+        base_str += f""" Please return an assert statement to check the correctness of {self.name}.You should return only one line assert statement. Omit explanations or any additional text. """
         return base_str
 
     # Convert Parsel-style asserts to asserts in the target language
@@ -76,11 +73,13 @@ assert"""
     def get_implementation_strs(self):
         def join_str(strs):
             return "\n".join(strs)
-        return [CONSTS["impl_helper"].format(
+        impl = [CONSTS["impl_helper"].format(
             impls=join_str(impl),
             asserts=join_str([
                 CONSTS["assert_helper"](cur_assert) for cur_assert in self.asserts]),
         ) for impl in self.implementations]
+        print(impl)
+        return impl
 
     # Call code model and optionally filter the results
     # Generate implementations for the function
@@ -113,7 +112,7 @@ assert"""
             num_completions = CONSTS['num_completions']
         tests = codex.generate(
             codex_in=self.get_codex_test_input(),
-            num_completions=num_completions * 5,
+            num_completions=num_completions * 2,
             max_tokens=100,
             temperature=0.6,
             stop="\n",

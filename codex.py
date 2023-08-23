@@ -25,7 +25,7 @@ class CodeGen():
     def generate(self,
         codex_in, num_completions=8, max_tokens=500, temperature=0.5, presence_penalty=0.0,
         stop=["\ndef"], indented=True, indented_after_first_line=False, require=None, cache_key=None,
-        rate_limit_tokens=4000, verbose=False, logit_bias=None, model_name=None
+        rate_limit_tokens=4000, verbose=False, logit_bias=None, model_name=None, is_test=False
     ):
         if model_name is None:
             model_name = "gpt-3.5-turbo-0301"
@@ -63,9 +63,9 @@ class CodeGen():
             while True:
                 try:
                     time.sleep(8)
-                    if logit_bias is None:
+                    if not is_test:
                         print(codex_in)
-                        messages = [{"role" : "system", "content" : "You are an expert of the Python programming language."}, {"role": "user", "content": "Please return a python function meets the following requirements. You should return return only the pure code. Omit explanations or any additional text. Ensure that your code can be directly compiled without errors.\n" + codex_in}, {"role": "user", "content": codex_in}]
+                        messages = [{"role" : "system", "content" : "You are an expert of the Python programming language."}, {"role": "user", "content": "Please return a python function meets the following requirements. You should return return only the pure code. Omit explanations or any additional text. Ensure that your code can be directly compiled without errors.\n" + codex_in}]
                         completions = openai.ChatCompletion.create(
                             model=model_name,
                             messages=messages,
@@ -75,6 +75,8 @@ class CodeGen():
                             n=num_completions,
                         )['choices']
                     else:
+                        print(codex_in)
+                        messages = [{"role" : "system", "content" : "You are an expert of the Python programming language."}, {"role": "user", "content": codex_in}]
                         completions = openai.ChatCompletion.create(
                             model=model_name,
                             messages=messages,
