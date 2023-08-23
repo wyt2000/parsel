@@ -88,7 +88,7 @@ assert"""
         if 'max_tokens' in CONSTS:
             max_tokens = CONSTS['max_tokens']
         else:
-            max_tokens = 3000
+            max_tokens = 500 
         if num_completions is None:
             num_completions = CONSTS['num_completions']
         self.implementations = codex.generate(

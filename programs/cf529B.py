@@ -19,12 +19,8 @@ def parse_line(l):
 
 # Takes the input line and first splits on newline. Ignores the first line, and parses each of the remaining lines as a list of two numbers, which give a list L of lists. Returns L.
 def parse_input(input_string):
-    lines = input_string.split('\n')[1:] # ignore first line
-    L = []
-    for line in lines:
-        if line:
-            L.append(parse_line(line))
-    return L
+    lines = input_string.split("\n")[1:]
+    return [list(map(int, parse_line(line))) for line in lines if line]
 # recusively enumerates the subsets of size k of the list L. Base cases: if k = 0, returns a list containing the empty list. If k > len(L), returns the empty list. Otherwise, first construct the subsets that contain the first element, then those that do not, and return their concatenation.
 def enumerate_subsets(L, k):
     if k == 0:
@@ -36,19 +32,17 @@ def enumerate_subsets(L, k):
         subsets_without_first = enumerate_subsets(L[1:], k)
         return subsets_with_first + subsets_without_first
 # Returns all subsets of L with sizes ranging from 0 to k, inclusive.
-
 def enumerate_subsets_at_most_k(L, k):
-    result = []
+    subsets = []
     for i in range(k+1):
-        result += enumerate_subsets(L, i)
-    return result
-
+        subsets += enumerate_subsets(L, i)
+    return subsets
 # takes a list of pairs (width, height). Computes the sum of the widths and the maximum of the heights. Returns the product of those two numbers.
 
 def compute_area(whs):
-    width_sum = sum([wh[0] for wh in whs])
-    height_max = max([wh[1] for wh in whs])
-    return width_sum * height_max
+    sum_widths = sum([wh[0] for wh in whs])
+    max_height = max([wh[1] for wh in whs])
+    return sum_widths * max_height
 
 # Takes a list of pairs of form [w, h] and a subset of indices to invert. Returns a list where the elements of whs whose index is in the subset are inverted to [h, w], and the others appear as given.
 
@@ -59,7 +53,8 @@ def apply_inversions(whs, subset):
 
 # First, calls enumerate_subsets_at_most_k passing integer list range from 0 to whs length and half the length of whs rounded down. Returns the minimum result of calling compute_area on the list given by apply_inversions with whs and of the subset.
 def minimum_area(whs):
-    subsets = enumerate_subsets_at_most_k(list(range(len(whs))), len(whs)//2)
+    k = len(whs) // 2
+    subsets = enumerate_subsets_at_most_k(list(range(len(whs))), k)
     min_area = float('inf')
     for subset in subsets:
         inverted_whs = apply_inversions(whs, subset)
