@@ -5,4 +5,4 @@ keys/*
 cache.json
 old/*
 generated/*
-programs/
+programs/*

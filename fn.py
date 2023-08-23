@@ -34,7 +34,7 @@ class Function:
             uses = []
             for child in other_children:
                 ret_str = (" -> " + ", ".join(child.ret)) if child.ret else ""
-                uses.append(f"  - {child.name}({', '.join(child.args)}){ret_str}: {child.desc}")
+                uses.append(f"  - def {child.name}({', '.join(child.args)}){ret_str}: {child.desc}")
             base_str += CONSTS["use_helper"].format(
                     uses='\n'.join(uses)
             )

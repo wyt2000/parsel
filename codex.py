@@ -91,9 +91,10 @@ class CodeGen():
             for completion in completions:
                 result = []
                 response = completion["message"]["content"]
-                if response[:9] == "```python" or response[:9] == "```Python":
-                    response = response[9:]
-                response = response.strip("```")
+                if '```' in response:
+                    response = response.split('```')[1]
+                    if response[:6] == "python":
+                        response = response[6:]
                 print(response)
                 for line_idx, line in enumerate(response.split("\n")): 
                     result += [line]
