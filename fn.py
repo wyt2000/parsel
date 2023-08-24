@@ -23,20 +23,24 @@ class Function:
     # i.e. returns the function signature
     def header(self):
         return CONSTS["header_str"](self.name, self.args)
-
-    # Constructs prompt for code generation
-    def get_codex_input(self):
-        base_str = ""
-        base_str += self.prefix
-        already_listed = [self.name]
+    
+    # Get uses function descriptions
+    def get_uses(self):
         other_children = [child for child in self.children if child.name != self.name]
         if other_children:
             uses = []
             for child in other_children:
                 ret_str = (" -> " + ", ".join(child.ret)) if child.ret else ""
                 uses.append(f"  - def {child.name}({', '.join(child.args)}){ret_str}: {child.desc}")
+            return '\n'.join(uses)
+
+    # Constructs prompt for code generation
+    def get_codex_input(self):
+        base_str = ""
+        base_str += self.prefix
+        if uses := self.get_uses():
             base_str += CONSTS["use_helper"].format(
-                    uses='\n'.join(uses)
+                uses=uses
             )
         if self.desc:
             if isinstance(CONSTS["desc_helper"], str):
@@ -53,10 +57,13 @@ class Function:
 
     # Constructs prompt for code generation
     def get_codex_test_input(self):
-        base_str = f"# Please write an assert statement in python to check the correctness of {self.name}.\n"
+        base_str = ""
+        if uses := self.get_uses():
+            base_str += f"# The function called by {self.name}:\n{uses} \n"
         if self.desc:
-            base_str += f"# Description: {self.desc}.\n"
+            base_str += f"# The description of {self.name}: {self.desc}.\n"
         base_str += f"{self.header()}:\n"
+        base_str += f"# Please write an assert statement in python to check the correctness of {self.name}.\n"
         base_str += f"# You should only return a single line code, which is the assert statement. Omit the code of {self.name}, comments or any additional text.\n"
         return base_str
 
@@ -103,6 +110,8 @@ class Function:
             require=None,
             cache_key=None,
         )
+        for code in self.implementations:
+            print(code)
         self.implementations = list(filter(CONSTS["impl_filter"], self.implementations))
         if "shuffle_implementations" in CONSTS and CONSTS["shuffle_implementations"]:
             random.shuffle(self.implementations)
@@ -110,12 +119,10 @@ class Function:
 
     # Generate tests for this function
     def generate_tests(self, codex, num_completions=None):
-        if num_completions is None:
-            num_completions = CONSTS['num_completions']
+        num_completions = CONSTS['num_completions_test']
         tests = codex.generate(
             codex_in=self.get_codex_test_input(),
-            num_completions=num_completions * 2,
-            max_tokens=100,
+            num_completions=num_completions,
             temperature=0.6,
             stop="\n",
             indented=CONSTS['needs_indent'],
@@ -127,7 +134,8 @@ class Function:
         for test in tests:
             for line in test:
                 if 'assert' in line:
-                    line = line.replace("assert", "", 1).strip()
+                    print(line)
+                    line = line.replace("assert", "", 1)
                     self.asserts.add(line)
                     break
         print(self.asserts)
