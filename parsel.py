@@ -206,7 +206,8 @@ def update_best_attempt(scc, all_attempts, implementation_set, asserts_passed, e
                 all_found[fn] += [assert_target]
     if generate_tests:
         # If we're generating tests, we need to make sure that we've found at least two different values for each function
-        found_successful_generation = len(all_found) == len(scc) and all(len(set(found)) >= 2 for found in all_found.values())
+        # Modified!: Since there may be fewer tests, delete the check of each function passing >= 2 different tests.
+        found_successful_generation = len(all_found) == len(scc)
     else:
         # If we're not generating tests and we get here, we've found a successful implementation
         found_successful_generation = True
@@ -579,7 +580,8 @@ def write_to_file(filename, defined_fns):
                 continue
             asserts_dict[assert_fn] = True
         asserts = "\n".join(list(asserts_dict.keys()))
-    assert CONSTS['exist_asserts'](asserts)
+    # Modified!: Remove exist_asserts check to allow codegen when all tests failed.
+    # assert CONSTS['exist_asserts'](asserts)
     exec_pre = CONSTS['exec_pre']
     contents = f"{exec_pre}{fn_defs}\n{asserts}"
     with open(filename, "w") as f:

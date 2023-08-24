@@ -158,8 +158,8 @@ def simplify_assert(assert_passed):
 
 CONSTS = {
     "rate_limit_tokens_text": 16000,
-    "num_completions": 3,
-    "num_completions_test": 1,
+    "num_completions": 1,
+    "num_completions_test": 5,
     "text_model_name": None,
     "timeout": 0.5,
     "shuffle_always": True,
