@@ -38,10 +38,6 @@ class Function:
     def get_codex_input(self):
         base_str = ""
         base_str += self.prefix
-        if uses := self.get_uses():
-            base_str += CONSTS["use_helper"].format(
-                uses=uses
-            )
         if self.desc:
             if isinstance(CONSTS["desc_helper"], str):
                 base_str += CONSTS["desc_helper"].format(desc=self.desc)
@@ -50,6 +46,10 @@ class Function:
         if self.ret and ', '.join(self.ret):
             base_str += CONSTS["ret_helper"].format(ret=', '.join(self.ret))
         base_str += f"{self.header()}:\n"
+        if uses := self.get_uses():
+            base_str += CONSTS["use_helper"].format(
+                uses=uses
+            )
         if self.asserts:
             for cur_assert in self.asserts:
                 base_str += CONSTS["assert_helper"](cur_assert)

@@ -25,7 +25,7 @@ class CodeGen():
     def generate(self,
         codex_in, num_completions=8, max_tokens=500, temperature=0.5, presence_penalty=0.0,
         stop=["\ndef"], indented=True, indented_after_first_line=False, require=None, cache_key=None,
-        rate_limit_tokens=4000, verbose=False, logit_bias=None, model_name=None, is_test=False
+        rate_limit_tokens=4000, verbose=False, logit_bias={}, model_name=None, is_test=False
     ):
         if model_name is None:
             model_name = "gpt-3.5-turbo-0301"
@@ -73,6 +73,7 @@ class CodeGen():
                             presence_penalty=presence_penalty,
                             max_tokens=max_tokens,
                             n=num_completions,
+                            logit_bias=logit_bias
                         )['choices']
                     else:
                         print(codex_in)

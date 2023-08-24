@@ -159,7 +159,7 @@ def simplify_assert(assert_passed):
 CONSTS = {
     "rate_limit_tokens_text": 16000,
     "num_completions": 1,
-    "num_completions_test": 5,
+    "num_completions_test": 3,
     "text_model_name": None,
     "timeout": 0.5,
     "shuffle_always": True,
@@ -176,7 +176,7 @@ CONSTS = {
     "sig_helper": "# Signature: {sig}\n",
     "desc_helper": "# You should implement a single function which meets the following requirements:\n  - {desc}\n",
     "ret_helper": "# Returns: {ret}\n",
-    "use_helper": "# You must call all of the follwing functions immediately because they have already been implemented:\n{uses}\n# You can not reimplement them in your code.\n",
+    "use_helper": "# The following functions have already been implemented. You should ensure that all of them are called in your code. You are forbidden to redefine or reimplement them:\n{uses}\n",
     "impl_helper": "{impls}",
     "assert_helper": lambda _: "",
     "assert_check": assert_check,
