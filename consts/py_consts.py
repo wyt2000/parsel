@@ -173,7 +173,7 @@ CONSTS = {
     "import": "from helpers import {name}\n",
     "header_str": lambda name, args: f"# Function header: def {name}({', '.join(args)})",
     "sig_helper": "# Signature: {sig}\n",
-    "desc_helper": "# You should implement a single function which meets the following requirements:\n - {desc}\n",
+    "desc_helper": "# You should implement a single function which meets the following requirements:\n  - {desc}\n",
     "ret_helper": "# Returns: {ret}\n",
     "use_helper": "# You must call all of the follwing functions immediately because they have already been implemented:\n{uses}\n# You can not reimplement them in your code.\n",
     "impl_helper": "{impls}",

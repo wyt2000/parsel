@@ -99,7 +99,6 @@ class CodeGen():
                     response = response.split('```')[1]
                     if response[:6] == "python":
                         response = response[6:]
-                print(response)
                 for line_idx, line in enumerate(response.split("\n")): 
                     result += [line]
                 results.append(result)

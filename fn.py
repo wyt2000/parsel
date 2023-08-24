@@ -53,8 +53,11 @@ class Function:
 
     # Constructs prompt for code generation
     def get_codex_test_input(self):
-        base_str = self.get_codex_input()
-        base_str += f""" Please return an assert statement to check the correctness of {self.name}.You should return only one line assert statement. Omit explanations or any additional text. """
+        base_str = f"# Please write an assert statement in python to check the correctness of {self.name}.\n"
+        if self.desc:
+            base_str += f"# Description: {self.desc}.\n"
+        base_str += f"{self.header()}:\n"
+        base_str += f"# You should only return a single line code, which is the assert statement. Omit the code of {self.name}, comments or any additional text.\n"
         return base_str
 
     # Convert Parsel-style asserts to asserts in the target language
@@ -78,7 +81,6 @@ class Function:
             asserts=join_str([
                 CONSTS["assert_helper"](cur_assert) for cur_assert in self.asserts]),
         ) for impl in self.implementations]
-        print(impl)
         return impl
 
     # Call code model and optionally filter the results
@@ -121,8 +123,14 @@ class Function:
             require=None,
             cache_key=None,
         )
-        tests = set([test[0] for test in tests if test])
-        self.asserts = tests
+        self.asserts = set()
+        for test in tests:
+            for line in test:
+                if 'assert' in line:
+                    line = line.replace("assert", "", 1).strip()
+                    self.asserts.add(line)
+                    break
+        print(self.asserts)
         return tests
 
     # Converts any parent names to references to the actual parent functions

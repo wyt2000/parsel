@@ -12,6 +12,7 @@ import time
 from consts import CONSTS, mode
 import os
 import ast
+import traceback
 
 
 # When a function is called but not defined, we can try to
@@ -43,6 +44,7 @@ def fill_in_missing_fn(missing_fn_name, scc, defined_fns, implementation_set, im
                     fn.fix_implementation(implementation)
             return new_implementation_attempt
         except:
+            traceback.print_exc() 
             continue
 
 
