@@ -158,7 +158,7 @@ def simplify_assert(assert_passed):
 
 CONSTS = {
     "rate_limit_tokens_text": 16000,
-    "num_completions": 1,
+    "num_completions": 3,
     "num_completions_test": 3,
     "text_model_name": None,
     "timeout": 0.5,
@@ -174,7 +174,7 @@ CONSTS = {
     "import": "from helpers import {name}\n",
     "header_str": lambda name, args: f"# Function header: def {name}({', '.join(args)})",
     "sig_helper": "# Signature: {sig}\n",
-    "desc_helper": "# You should implement a single function which meets the following requirements:\n  - {desc}\n",
+    "desc_helper": "# You should implement a function which meets the following requirements:\n  - {desc}\n",
     "ret_helper": "# Returns: {ret}\n",
     "use_helper": "# The following functions have already been implemented. You should ensure that all of them are called in your code. You are forbidden to redefine or reimplement them:\n{uses}\n",
     "impl_helper": "{impls}",

@@ -207,12 +207,18 @@ def update_best_attempt(scc, all_attempts, implementation_set, asserts_passed, e
     if generate_tests:
         # If we're generating tests, we need to make sure that we've found at least two different values for each function
         # Modified!: Since there may be fewer tests, delete the check of each function passing >= 2 different tests.
-        found_successful_generation = len(all_found) == len(scc)
+        found_successful_generation = (len(all_found) == len(scc))
     else:
         # If we're not generating tests and we get here, we've found a successful implementation
         found_successful_generation = True
     min_found = min(len(found) for found in all_found.values())
+    if min_found == 0:
+        # if exist 0, get the second min if exists.
+        found_nonzero = [found for found in all_found.values() if len(found) != 0]
+        if found_nonzero:
+            min_found = min(len(found) for found in found_nonzero)
     if found_successful_generation:
+        #print("found_successful_generation")
         if generate_tests:
             score = min_found
             if asserts_passed_hash in all_attempts:
@@ -340,13 +346,8 @@ def multiprocess_fill(scc, dependencies_str, defined_fns, all_implementations, a
                     # Check if the future has succeeded
                     try:
                         result = future.result(timeout=timeout)
-                        print(result)
-                        if len(result) > 3:
-                            for code in result[1]:
-                                print(code)
-                            for passed in result[3]:
-                                print(passed)
                         if result is not None:
+                            print(result)
                             implementation_set, implementation_attempt = eval_result(scc, defined_fns, asserts_str, implementation_set_keys, all_attempts, pbar, executor, futures, result)
                             return implementation_attempt
                         else:

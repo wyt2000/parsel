@@ -109,9 +109,24 @@ class Function:
             indented_after_first_line=False,
             require=None,
             cache_key=None,
+            logit_bias={711:-100} # ban token ` def`
         )
-        for code in self.implementations:
-            print(code)
+        implementations = []
+        for raw_code in self.implementations:
+            code = []
+            ok = False
+            for line in raw_code:
+                if line.startswith(f"def {self.name}"):
+                    ok = True
+                    code.append(line)
+                    continue
+                if ok:
+                    if not line.startswith(f" "):
+                        break
+                    code.append(line)
+            implementations.append(code)
+        print(implementations)
+        self.implementations = implementations
         self.implementations = list(filter(CONSTS["impl_filter"], self.implementations))
         if "shuffle_implementations" in CONSTS and CONSTS["shuffle_implementations"]:
             random.shuffle(self.implementations)
