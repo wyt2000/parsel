@@ -63,7 +63,7 @@ class Function:
         if self.desc:
             base_str += f"# The description of {self.name}: {self.desc}.\n"
         base_str += f"{self.header()}:\n"
-        base_str += f"# Please write an assert statement in python to check the correctness of {self.name}.\n"
+        base_str += f"# Please write an assert statement in python to check the correctness of {self.name}. Your function call should correspond to the header.\n"
         base_str += f"# You should only return a single line code, which is the assert statement. Omit the code of {self.name}, comments or any additional text.\n"
         return base_str
 

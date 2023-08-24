@@ -343,8 +343,8 @@ def multiprocess_fill(scc, dependencies_str, defined_fns, all_implementations, a
                         if len(result) > 3:
                             for code in result[1]:
                                 print(code)
-                            for asserts in result[3]:
-                                print(asserts)
+                            for passed in result[3]:
+                                print(passed)
                         if result is not None:
                             implementation_set, implementation_attempt = eval_result(scc, defined_fns, asserts_str, implementation_set_keys, all_attempts, pbar, executor, futures, result)
                             return implementation_attempt
