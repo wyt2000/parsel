@@ -58,12 +58,12 @@ class Function:
     # Constructs prompt for code generation
     def get_codex_test_input(self):
         base_str = ""
+        base_str += f"# Please write an assert statement in python to check the correctness of {self.name}. Your function call should correspond to the header.\n"
+        base_str += f"{self.header()}:\n"
         if uses := self.get_uses():
             base_str += f"# The function called by {self.name}:\n{uses} \n"
         if self.desc:
             base_str += f"# The description of {self.name}: {self.desc}.\n"
-        base_str += f"{self.header()}:\n"
-        base_str += f"# Please write an assert statement in python to check the correctness of {self.name}. Your function call should correspond to the header.\n"
         base_str += f"# You should only return a single line code, which is the assert statement. Omit the code of {self.name}, comments or any additional text.\n"
         return base_str
 
