@@ -176,7 +176,7 @@ CONSTS = {
     "sig_helper": "# Signature: {sig}\n",
     "desc_helper": "# You should implement a function which meets the following requirements:\n  - {desc}\n",
     "ret_helper": "# Returns: {ret}\n",
-    "use_helper": "# The following functions have already been implemented. You should ensure that all of them are called in your code. You are forbidden to redefine or reimplement them:\n{uses}\n",
+    "use_helper": "# The code should start with the following imports outside of all function definitions:\n{uses}\n",
     "impl_helper": "{impls}",
     "assert_helper": lambda _: "",
     "assert_check": assert_check,

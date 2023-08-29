@@ -1,8 +1,5 @@
 from consts import CONSTS
 import random
-import tiktoken
-
-encoding = tiktoken.get_encoding("cl100k_base")
 
 # Parsel representation of a function
 class Function:
@@ -37,6 +34,15 @@ class Function:
             uses = []
             for child in other_children:
                 ret_str = (" -> " + ", ".join(child.ret)) if child.ret else ""
+                uses.append(f"from utils import {child.name} # {child.name}({', '.join(child.args)}){ret_str}: {child.desc}")
+            return '\n'.join(uses)
+        
+    def get_uses_for_test(self):
+        other_children = [child for child in self.children if child.name != self.name]
+        if other_children:
+            uses = []
+            for child in other_children:
+                ret_str = (" -> " + ", ".join(child.ret)) if child.ret else ""
                 uses.append(f"  - def {child.name}({', '.join(child.args)}){ret_str}: {child.desc}")
             return '\n'.join(uses)
 
@@ -66,7 +72,7 @@ class Function:
         base_str = ""
         base_str += f"# Please write an assert statement in python to check the correctness of {self.name}. Your function call should correspond to the header.\n"
         base_str += f"{self.header()}:\n"
-        if uses := self.get_uses():
+        if uses := self.get_uses_for_test():
             base_str += f"# The function called by {self.name}:\n{uses} \n"
         if self.desc:
             base_str += f"# The description of {self.name}: {self.desc}.\n"
@@ -105,10 +111,7 @@ class Function:
             max_tokens = 500 
         if num_completions is None:
             num_completions = CONSTS['num_completions']
-        logit_bias = {711:-100, 755:5}
-        for use in self.get_use_names():
-            for token in encoding.encode(' '+use):
-                logit_bias[token] = 5 
+        logit_bias = {711:-100}
         self.implementations = codex.generate(
             codex_in=self.get_codex_input(),
             num_completions=num_completions,
