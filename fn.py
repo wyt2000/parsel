@@ -136,6 +136,8 @@ class Function:
                 if ok:
                     if not line.startswith(" "):
                         break
+                    if "from utils" in line:
+                        continue
                     code.append(line)
             implementations.append(code)
         print(implementations)
