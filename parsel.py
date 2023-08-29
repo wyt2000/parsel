@@ -496,42 +496,39 @@ def clear_scc(scc_idx, sccs, implemented_sccs, scc_edges, defined_fns, codegen, 
 
 
 # Implement the SCC and return the string
-def implement_scc(scc_idx, sccs, implemented_sccs, scc_edges, defined_fns, codegen, allow_autofill=False, should_expand=False, debug=False, sample_only=False, seed=42, backtrack=False):
+def implement_scc(scc_idx, sccs, implemented_sccs, scc_edges, defined_fns, codegen, allow_autofill=False, should_expand=False, debug=False, sample_only=False, seed=42, backtrack=False, num_completions=1):
     print("Implementing SCC", scc_idx, sccs[scc_idx])
     if scc_idx in implemented_sccs:
         return implemented_sccs[scc_idx]
     dependencies_str = ""
     for edge in scc_edges[scc_idx]:
-        dependencies_str += implement_scc(edge, sccs, implemented_sccs, scc_edges, defined_fns, codegen, allow_autofill, should_expand, debug)
+        dependencies_str += implement_scc(edge, sccs, implemented_sccs, scc_edges, defined_fns, codegen, allow_autofill, should_expand, debug, num_completions=num_completions)
 
-    num_completions = CONSTS["min_completions"] if "min_completions" in CONSTS else CONSTS["num_completions"]
     error = None
     # We exponentially increase the number of completions until we reach the max, "num_completions"
-    while num_completions <= CONSTS["num_completions"]:
-        print(f"Trying {num_completions} completions")
-        try:
-            for fn_name in sccs[scc_idx]:
-                fn = defined_fns[fn_name]
-                fn.implement(codegen, num_completions=num_completions)
-                if generate_tests:
-                    fn.generate_tests(codegen, num_completions=num_completions)
+    print(f"Total: {num_completions} completions!")
+    try:
+        for fn_name in sccs[scc_idx]:
+            fn = defined_fns[fn_name]
+            fn.implement(codegen, num_completions=num_completions)
+            if generate_tests:
+                fn.generate_tests(codegen, num_completions=num_completions)
 
-            # We support a "sample only" mode, where we don't actually
-            # implement the SCC, but just try to run inference.
-            # This let's us parallelize inference and implementation.
-            if not sample_only:
-                new_str = dependencies_str + eval_scc(
-                    sccs[scc_idx], dependencies_str, defined_fns, codegen, allow_autofill, should_expand, debug, seed=seed, backtrack=False)
-            else:
-                new_str = dependencies_str
-            implemented_sccs[scc_idx] = new_str
-            return new_str
-        except KeyboardInterrupt:
-            raise KeyboardInterrupt
-        except Exception as e:
-            error = e
-            print("Error", e)
-        num_completions *= 2
+        # We support a "sample only" mode, where we don't actually
+        # implement the SCC, but just try to run inference.
+        # This let's us parallelize inference and implementation.
+        if not sample_only:
+            new_str = dependencies_str + eval_scc(
+                sccs[scc_idx], dependencies_str, defined_fns, codegen, allow_autofill, should_expand, debug, seed=seed, backtrack=False)
+        else:
+            new_str = dependencies_str
+        implemented_sccs[scc_idx] = new_str
+        return new_str
+    except KeyboardInterrupt:
+        raise KeyboardInterrupt
+    except Exception as e:
+        error = e
+        print("Error", e)
     if backtrack:
         # Backtracking allows us to try new implementations
         # of the dependencies if we fail to implement the SCC
@@ -540,7 +537,7 @@ def implement_scc(scc_idx, sccs, implemented_sccs, scc_edges, defined_fns, codeg
         for implemented_scc in list(implemented_sccs.keys()):
             del implemented_sccs[implemented_scc]
         new_str = implement_scc(
-            scc_idx, sccs, implemented_sccs, scc_edges, defined_fns, codegen, allow_autofill, should_expand, debug, seed=seed + 1, backtrack=True)
+            scc_idx, sccs, implemented_sccs, scc_edges, defined_fns, codegen, allow_autofill, should_expand, debug, seed=seed + 1, backtrack=True, num_completions=num_completions)
         implemented_sccs[scc_idx] = new_str
         return new_str
     raise error
@@ -593,16 +590,16 @@ def write_to_file(filename, defined_fns):
 # The key function of the program, which takes a function graph
 # Decomposes them to their strongly connected components
 # And then implements each SCC in turn
-def parsel_graph(defined_fns, codegen, allow_autofill=False, should_expand=False, debug=False, sample_only=False):
+def parsel_graph(defined_fns, codegen, allow_autofill=False, should_expand=False, debug=False, sample_only=False, num_completions=1):
     sccs, scc_edges = strongly_connected_components(defined_fns)#, consider_asserts=not generate_tests)
     implemented_sccs = {}
     for scc_idx, _ in enumerate(sccs):
-        implement_scc(scc_idx, sccs, implemented_sccs, scc_edges, defined_fns, codegen, allow_autofill, should_expand, debug, sample_only)
+        implement_scc(scc_idx, sccs, implemented_sccs, scc_edges, defined_fns, codegen, allow_autofill, should_expand, debug, sample_only, num_completions=num_completions)
     return defined_fns
 
 
 # Used to parse a Parsel file to a target language
-def parsel(codegen, source_file, target_file=None, allow_autofill=False, should_expand=False, debug=False, add_name_and_args=False):
+def parsel(codegen, source_file, target_file=None, allow_autofill=False, should_expand=False, debug=False, add_name_and_args=False, num_completions=1):
     assert source_file.split(".")[-1] == 'ss'
     if target_file is None:
         target_file = source_file.split(".")[0] + CONSTS['extension']
@@ -629,7 +626,7 @@ def parsel(codegen, source_file, target_file=None, allow_autofill=False, should_
         fn.prefix = "\n".join(header)
 
     # Compile the graph into a target language
-    defined_fns = parsel_graph(defined_fns, codegen, allow_autofill, should_expand, debug)
+    defined_fns = parsel_graph(defined_fns, codegen, allow_autofill, should_expand, debug, num_completions=num_completions)
 
     # Write the compiled program to a file
     write_to_file(target_file, defined_fns)
@@ -648,6 +645,8 @@ if __name__ == "__main__":
     argparser.add_argument("-b", "--best", help="Best", action="store_true")
     argparser.add_argument("-g", "--generate_tests", help="Generate tests", action="store_true")
     argparser.add_argument("-n", "--add_name_and_args", help="Add name and args", action="store_true")
+    argparser.add_argument("-t", "--num_completions", help="Set trying times of each functions", type=int, default=1)
+    argparser.add_argument("-s", "--save_path", help="Target code save path", type=str, default=None)
     args = argparser.parse_args()
 
     assert args.source_file.split(".")[-1] == 'ss'
@@ -657,6 +656,6 @@ if __name__ == "__main__":
     else:
         debug = args.debug
     generate_tests = args.generate_tests
-    parsel(codegen, args.source_file, allow_autofill=args.allow_autofill, should_expand=args.allow_expand, debug=debug, add_name_and_args=args.add_name_and_args)
+    parsel(codegen, args.source_file, target_file=args.save_path, allow_autofill=args.allow_autofill, should_expand=args.allow_expand, debug=debug, add_name_and_args=args.add_name_and_args, num_completions=args.num_completions)
 else:
     generate_tests = False

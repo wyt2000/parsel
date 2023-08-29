@@ -149,10 +149,11 @@ class Function:
 
     # Generate tests for this function
     def generate_tests(self, codex, num_completions=None):
-        num_completions = CONSTS['num_completions_test']
+        if num_completions is None:
+            num_completions = CONSTS['num_completions_test']
         tests = codex.generate(
             codex_in=self.get_codex_test_input(),
-            num_completions=num_completions,
+            num_completions=num_completions * 2,
             temperature=0.6,
             stop="\n",
             indented=CONSTS['needs_indent'],

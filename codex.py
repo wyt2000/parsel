@@ -59,7 +59,7 @@ class CodeGen():
         completions_per_call = rate_limit_tokens // max_tokens
         while total_tokens > 0:
             #num_completions = min(total_tokens // max_tokens, completions_per_call)
-            print(num_completions, "completions")
+            print(f"Actually need: {num_completions} completions!")
             while True:
                 try:
                     time.sleep(8)
