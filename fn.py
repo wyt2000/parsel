@@ -1,5 +1,8 @@
 from consts import CONSTS
 import random
+import tiktoken
+
+encoding = tiktoken.get_encoding("cl100k_base")
 
 # Parsel representation of a function
 class Function:
@@ -23,6 +26,9 @@ class Function:
     # i.e. returns the function signature
     def header(self):
         return CONSTS["header_str"](self.name, self.args)
+
+    def get_use_names(self):
+        return [child.name for child in self.children if child.name != self.name]
     
     # Get uses function descriptions
     def get_uses(self):
@@ -99,6 +105,10 @@ class Function:
             max_tokens = 500 
         if num_completions is None:
             num_completions = CONSTS['num_completions']
+        logit_bias = {711:-100, 755:5}
+        for use in self.get_use_names():
+            for token in encoding.encode(' '+use):
+                logit_bias[token] = 5 
         self.implementations = codex.generate(
             codex_in=self.get_codex_input(),
             num_completions=num_completions,
@@ -109,19 +119,20 @@ class Function:
             indented_after_first_line=False,
             require=None,
             cache_key=None,
-            logit_bias={711:-100} # ban token ` def`
+            logit_bias=logit_bias
         )
         implementations = []
+        print(self.implementations)
         for raw_code in self.implementations:
             code = []
             ok = False
             for line in raw_code:
-                if line.startswith(f"def {self.name}"):
+                if not ok and line.startswith(f"def {self.name}("):
                     ok = True
                     code.append(line)
                     continue
                 if ok:
-                    if not line.startswith(f" "):
+                    if not line.startswith(" "):
                         break
                     code.append(line)
             implementations.append(code)
