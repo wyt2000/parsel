@@ -122,7 +122,6 @@ class Function:
             logit_bias=logit_bias
         )
         implementations = []
-        print(self.implementations)
         for raw_code in self.implementations:
             code = []
             ok = False

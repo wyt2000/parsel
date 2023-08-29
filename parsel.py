@@ -347,7 +347,6 @@ def multiprocess_fill(scc, dependencies_str, defined_fns, all_implementations, a
                     try:
                         result = future.result(timeout=timeout)
                         if result is not None:
-                            print(result)
                             implementation_set, implementation_attempt = eval_result(scc, defined_fns, asserts_str, implementation_set_keys, all_attempts, pbar, executor, futures, result)
                             return implementation_attempt
                         else:
