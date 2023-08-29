@@ -658,4 +658,4 @@ if __name__ == "__main__":
     generate_tests = args.generate_tests
     parsel(codegen, args.source_file, target_file=args.save_path, allow_autofill=args.allow_autofill, should_expand=args.allow_expand, debug=debug, add_name_and_args=args.add_name_and_args, num_completions=args.num_completions)
 else:
-    generate_tests = False
+    generate_tests = True 
