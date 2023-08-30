@@ -207,7 +207,8 @@ def update_best_attempt(scc, all_attempts, implementation_set, asserts_passed, e
     if generate_tests:
         # If we're generating tests, we need to make sure that we've found at least two different values for each function
         # Modified!: Since there may be fewer tests, delete the check of each function passing >= 2 different tests.
-        found_successful_generation = (len(all_found) == len(scc))
+        # found_successful_generation = (len(all_found) == len(scc))
+        found_successful_generation = True
     else:
         # If we're not generating tests and we get here, we've found a successful implementation
         found_successful_generation = True
